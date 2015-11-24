@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+var debug = require('debug')('readme-builder-app');
+var scheduler = require('../index');
+scheduler('job')
