@@ -1,11 +1,11 @@
 var debug = require('debug');
-var build_readme = require('./lib/builder');
+var builder = require('./lib/builder');
 var amqp = require('amqplib');
 
-function run(q) {
+var broker_url = process.env.RABBITMQ_URL ||
+    'amqp://q.rhub.me:5672/rhub';
 
-    var broker_url = process.env.RABBITMQ_URL ||
-	    'amqp://guest:guest@q.rhub.me:5672';
+function run(q) {
 
     amqp.connect(broker_url).then(function(conn) {
 	process.once('SIGINT', function() { conn.close(); });
