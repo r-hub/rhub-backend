@@ -1,10 +1,35 @@
 
+# Get the platform, the R package uses this to determine
+# the packages needed
+export RHUB_PLATFORM=$(docker run --user docker --rm rhub/debian-gcc-release \
+		       bash -c 'echo $RHUB_PLATFORM')
+
+# Look up system requirements
+# wget https://raw.githubusercontent.com/MangoTheCat/remotes/master/install-github.R
+# R -e "source(\"install-github.R\")\$value(\"r-hub/sysreqs\")"
+wget -O "$package" "$url"
+DESC=$(tar tzf "$package" | grep "^[^/]*/DESCRIPTION$")
+tar xzf "$package" "$DESC"
+sysreqs=$(Rscript -e "library(sysreqs); cat(sysreqs(\"$DESC\"))")
+rm -rf "$package" "$DESC"
+
+# Install them
+cont=$(docker run -d --user root rhub/debian-gcc-release \
+	      apt-get install -y $sysreqs)
+
+# Wait until it stops
+docker attach $cont || true
+
+# Save the container as an image
+image=$(docker commit $cont)
+
+# Run the build in the new image
+
 env=$(tempfile)
 echo url=$url >> $env
 echo package=$package >> $env
 
-docker run -i --user docker --env-file $env rhub/debian-gcc-release \
-  /bin/bash <<'EOF'
+docker run -i --user docker --env-file $env --rm $image /bin/bash <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
 
@@ -30,3 +55,7 @@ R -e "remotes::install_local(\"$package\", dependencies = TRUE)"
 
 R CMD check "$package"
 EOF
+
+# Destroy the new containers and the images
+docker rm $cont   || true
+docker rmi $image || true
