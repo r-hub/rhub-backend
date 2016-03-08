@@ -1,8 +1,9 @@
 
 # Get the platform, the R package uses this to determine
 # the packages needed
-export RHUB_PLATFORM=$(docker run --user docker --rm rhub/debian-gcc-release \
-		       bash -c 'echo $RHUB_PLATFORM')
+export RHUB_PLATFORM=$(docker run --user docker \
+			      --rm rhub/${image} \
+			      bash -c 'echo $RHUB_PLATFORM')
 
 # Look up system requirements
 # wget https://raw.githubusercontent.com/MangoTheCat/remotes/master/install-github.R
@@ -14,14 +15,13 @@ sysreqs=$(Rscript -e "library(sysreqs); cat(sysreqs(\"$DESC\"))")
 rm -rf "$package" "$DESC"
 
 # Install them
-cont=$(docker run -d --user root rhub/debian-gcc-release \
-	      apt-get install -y $sysreqs)
+cont=$(docker run -d --user root rhub/${image} apt-get install -y $sysreqs)
 
 # Wait until it stops
 docker attach $cont || true
 
 # Save the container as an image
-image=$(docker commit $cont)
+newimage=$(docker commit $cont)
 
 # Run the build in the new image
 
@@ -29,7 +29,7 @@ env=$(tempfile)
 echo url=$url >> $env
 echo package=$package >> $env
 
-docker run -i --user docker --env-file $env --rm $image /bin/bash <<'EOF'
+docker run -i --user docker --env-file $env --rm $newimage /bin/bash <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
 
@@ -58,4 +58,4 @@ EOF
 
 # Destroy the new containers and the images
 docker rm $cont   || true
-docker rmi $image || true
+docker rmi $newimage || true
