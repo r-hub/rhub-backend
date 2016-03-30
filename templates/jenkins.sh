@@ -15,7 +15,7 @@ sysreqs=$(Rscript -e "library(sysreqs); cat(sysreqs(\"$DESC\"))")
 rm -rf "$package" "$DESC"
 
 # Install them
-cont=$(docker run -d --user root rhub/${image} apt-get install -y $sysreqs)
+cont=$(docker run -d --user root rhub/${image} bash -c "apt-get update && apt-get install -y $sysreqs")
 
 # Wait until it stops
 docker attach $cont || true
