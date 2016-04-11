@@ -8,6 +8,9 @@
   "scripts": {
     "start": "node ./bin/scheduler"
   },
+  "engines": {
+    "node": "4.4.x"
+  },
   "dependencies": {
     "amqplib": "^0.4.0",
     "debug": "~2.2.0",
