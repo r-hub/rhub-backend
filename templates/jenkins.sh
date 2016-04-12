@@ -14,14 +14,19 @@ tar xzf "$package" "$DESC"
 sysreqs=$(Rscript -e "library(sysreqs); cat(sysreqs(\"$DESC\"))")
 rm -rf "$package" "$DESC"
 
-# Install them
-cont=$(docker run -d --user root rhub/${image} bash -c "apt-get update && apt-get install -y $sysreqs")
-
-# Wait until it stops
-docker attach $cont || true
-
-# Save the container as an image
-newimage=$(docker commit $cont)
+# Install them, if there is anything to install
+if [ ! -z "${sysreqs}" ]; then
+    cont=$(docker run -d --user root rhub/${image} \
+		  bash -c "apt-get update && apt-get install -y $sysreqs")
+    # Wait until it stops
+    docker attach $cont || true
+    # Save the container as an image
+    newimage=$(docker commit $cont)
+else
+    # If there is nothing to install we just use the stock image
+    cont=""
+    newimage=rhub/${image}
+fi
 
 # Run the build in the new image
 
@@ -57,5 +62,8 @@ R CMD check "$package"
 EOF
 
 # Destroy the new containers and the images
-docker rm $cont   || true
-docker rmi $newimage || true
+# Only if we needed system installs, but not the stock image
+if [ ! -z "$cont" ]; then
+    docker rm $cont   || true
+    docker rmi $newimage || true
+fi
