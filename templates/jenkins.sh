@@ -11,13 +11,13 @@ export RHUB_PLATFORM=$(docker run --user docker \
 wget -O "$package" "$url"
 DESC=$(tar tzf "$package" | grep "^[^/]*/DESCRIPTION$")
 tar xzf "$package" "$DESC"
-sysreqs=$(Rscript -e "library(sysreqs); cat(sysreqs(\"$DESC\"))")
+sysreqs=$(Rscript -e "library(sysreqs); cat(sysreq_commands(\"$DESC\"))")
 rm -rf "$package" "$DESC"
 
 # Install them, if there is anything to install
 if [ ! -z "${sysreqs}" ]; then
     cont=$(docker run -d --user root rhub/${image} \
-		  bash -c "apt-get update && apt-get install -y $sysreqs")
+		  bash -c "$sysreqs")
     # Wait until it stops
     docker attach $cont || true
     # Save the container as an image
