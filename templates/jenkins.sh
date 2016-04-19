@@ -61,7 +61,7 @@ curl -o "$package" "$url"
 ## package bundle
 R -e "remotes::install_local(\"$package\", dependencies = TRUE)"
 
-R CMD check "$package"
+xvfb-run R CMD check "$package"
 EOF
 
 # Destroy the new containers and the images
