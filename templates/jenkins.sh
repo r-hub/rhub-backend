@@ -38,11 +38,14 @@ docker run -i --user docker --env-file $env --rm $newimage /bin/bash <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
 
-## Configure R
+## Configure R, local package library, and also CRAN and BioConductor
 export PATH=$(ls /opt/R-* -d)/bin:$PATH
 export R_LIBS=~/R
 mkdir -p ~/R
 echo "options(repos = c(CRAN = \"https://cran.rstudio.com/\"))" >> ~/.Rprofile
+R -e "source('https://bioconductor.org/biocLite.R')"
+echo "options(repos = BiocInstaller::biocinstallRepos())" >> ~/.Rprofile
+echo "unloadNamespace('BiocInstaller')" >> ~/.Rprofile
 
 ## Download the single file install script from mangothecat/remotes
 ## We cannot do this from R, because some R versions do not support
