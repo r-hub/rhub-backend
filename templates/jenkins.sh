@@ -54,7 +54,7 @@ curl -O https://raw.githubusercontent.com/MangoTheCat/remotes/master/install-git
 R -e "source(\"install-github.R\")\$value(\"mangothecat/remotes\")"
 
 ## Download the submitted package
-curl -o "$package" "$url"
+curl -L -o "$package" "$url"
 
 ## Install the package, so its dependencies will be installed
 ## This is a temporary solution, until remotes::install_deps works on a 
