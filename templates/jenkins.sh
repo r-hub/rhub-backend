@@ -8,11 +8,19 @@ export RHUB_PLATFORM=$(docker run --user docker \
 # Look up system requirements
 # wget https://raw.githubusercontent.com/MangoTheCat/remotes/master/install-github.R
 # R -e "source(\"install-github.R\")\$value(\"r-hub/sysreqs\")"
+
+echo ">>>>>==================== Downloading and unpacking package file"
+
 wget -O "$package" "$url"
 DESC=$(tar tzf "$package" | grep "^[^/]*/DESCRIPTION$")
 tar xzf "$package" "$DESC"
+
+echo ">>>>>==================== Querying system requirements"
+
 sysreqs=$(Rscript -e "library(sysreqs); cat(sysreq_commands(\"$DESC\"))")
 rm -rf "$package" "$DESC"
+
+echo ">>>>>==================== Installing system requirements"
 
 # Install them, if there is anything to install
 if [ ! -z "${sysreqs}" ]; then
@@ -34,6 +42,8 @@ env=$(tempfile)
 echo url=$url >> $env
 echo package=$package >> $env
 
+echo ">>>>>==================== Starting Docker container"
+
 docker run -i --user docker --env-file $env --rm $newimage /bin/bash <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
@@ -47,6 +57,8 @@ R -e "source('https://bioconductor.org/biocLite.R')"
 echo "options(repos = BiocInstaller::biocinstallRepos())" >> ~/.Rprofile
 echo "unloadNamespace('BiocInstaller')" >> ~/.Rprofile
 
+echo ">>>>>==================== Querying package dependencies"
+
 ## Download the single file install script from mangothecat/remotes
 ## We cannot do this from R, because some R versions do not support
 ## HTTPS. Then we install a proper 'remotes' package with it.
@@ -56,10 +68,14 @@ R -e "source(\"install-github.R\")\$value(\"mangothecat/remotes\")"
 ## Download the submitted package
 curl -L -o "$package" "$url"
 
+echo ">>>>>==================== Installing package dependencies"
+
 ## Install the package, so its dependencies will be installed
 ## This is a temporary solution, until remotes::install_deps works on a 
 ## package bundle
 R -e "remotes::install_local(\"$package\", dependencies = TRUE)"
+
+echo ">>>>>==================== Running R CMD check"
 
 xvfb-run R CMD check "$package"
 EOF
