@@ -44,7 +44,7 @@ echo package=$package >> $env
 
 echo ">>>>>==================== Starting Docker container"
 
-docker run -i --user docker --env-file $env --rm $newimage /bin/bash <<'EOF'
+docker run -i --user docker --env-file $env --rm $newimage /bin/bash -l <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
 
