@@ -86,7 +86,7 @@ $RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE)"
 echo ">>>>>==================== Running R CMD check"
 
 ## Configuration. TODO: this should not be hardcoded here...
-export _R_FORCE_CHECK_SUGGESTS_=false
+export _R_CHECK_FORCE_SUGGESTS_=false
 
 echo About to run xvfb-run "$RBINARY" CMD check "$package"
 xvfb-run "$RBINARY" CMD check "$package"
