@@ -50,10 +50,11 @@ cd ~
 
 ## Configure R, local package library, and also CRAN and BioConductor
 export PATH=$(ls /opt/R-* -d)/bin:$PATH
+if [[ -z "$RBINARY" ]]; then RBINARY="R"; fi
 export R_LIBS=~/R
 mkdir -p ~/R
 echo "options(repos = c(CRAN = \"https://cran.rstudio.com/\"))" >> ~/.Rprofile
-R -e "source('https://bioconductor.org/biocLite.R')"
+$RBINARY -e "source('https://bioconductor.org/biocLite.R')"
 echo "options(repos = BiocInstaller::biocinstallRepos())" >> ~/.Rprofile
 echo "unloadNamespace('BiocInstaller')" >> ~/.Rprofile
 
@@ -63,7 +64,7 @@ echo ">>>>>==================== Querying package dependencies"
 ## We cannot do this from R, because some R versions do not support
 ## HTTPS. Then we install a proper 'remotes' package with it.
 curl -O https://raw.githubusercontent.com/MangoTheCat/remotes/master/install-github.R
-R -e "source(\"install-github.R\")\$value(\"mangothecat/remotes\")"
+$RBINARY -e "source(\"install-github.R\")\$value(\"mangothecat/remotes\")"
 
 ## Download the submitted package
 curl -L -o "$package" "$url"
@@ -73,11 +74,12 @@ echo ">>>>>==================== Installing package dependencies"
 ## Install the package, so its dependencies will be installed
 ## This is a temporary solution, until remotes::install_deps works on a 
 ## package bundle
-R -e "remotes::install_local(\"$package\", dependencies = TRUE)"
+$RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE)"
 
 echo ">>>>>==================== Running R CMD check"
 
-xvfb-run R CMD check "$package"
+echo About to run xvfb-run "$RBINARY" CMD check "$package"
+xvfb-run "$RBINARY" CMD check "$package"
 EOF
 
 # Destroy the new containers and the images
