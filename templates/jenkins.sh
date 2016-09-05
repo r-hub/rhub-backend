@@ -72,6 +72,7 @@ curl -L -o "$package" "$url"
 echo ">>>>>==================== Installing package dependencies"
 
 ## Print configuration information for compilers
+echo $PATH
 $RBINARY CMD config CC
 `$RBINARY CMD config CC` --version
 $RBINARY CMD config CXX
