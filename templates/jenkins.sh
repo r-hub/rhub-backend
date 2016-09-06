@@ -89,7 +89,7 @@ echo ">>>>>==================== Running R CMD check"
 export _R_CHECK_FORCE_SUGGESTS_=false
 
 echo About to run xvfb-run "$RBINARY" CMD check "$package"
-xvfb-run "$RBINARY" CMD check "$package"
+xvfb-run --server-args="-screen 0 1024x768x24" "$RBINARY" CMD check "$package"
 EOF
 
 # Destroy the new containers and the images
