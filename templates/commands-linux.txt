@@ -41,6 +41,8 @@ fi
 env=$(tempfile)
 echo url=$url >> $env
 echo package=$package >> $env
+echo checkArgs=$checkArgs >> $env
+echo "$envVars" >> $env
 
 echo ">>>>>==================== Starting Docker container"
 
@@ -88,8 +90,8 @@ echo ">>>>>==================== Running R CMD check"
 ## Configuration. TODO: this should not be hardcoded here...
 export _R_CHECK_FORCE_SUGGESTS_=false
 
-echo About to run xvfb-run "$RBINARY" CMD check "$package"
-xvfb-run --server-args="-screen 0 1024x768x24" "$RBINARY" CMD check "$package"
+echo About to run xvfb-run "$RBINARY" CMD check $checkArgs "$package"
+xvfb-run --server-args="-screen 0 1024x768x24" "$RBINARY" CMD check $checkArgs "$package"
 EOF
 
 # Destroy the new containers and the images
