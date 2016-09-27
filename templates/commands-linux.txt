@@ -90,8 +90,12 @@ echo ">>>>>==================== Running R CMD check"
 ## Configuration. TODO: this should not be hardcoded here...
 export _R_CHECK_FORCE_SUGGESTS_=false
 
-echo About to run xvfb-run "$RBINARY" CMD check $checkArgs "$package"
-xvfb-run --server-args="-screen 0 1024x768x24" "$RBINARY" CMD check $checkArgs "$package"
+if [ -z "$RHUB_CHECK_COMMAND" ]; then
+   RHUB_CHECK_COMMAND="$RBINARY CMD check $checkArgs"
+fi
+
+echo About to run xvfb-run $RHUB_CHECK_COMMAND $package
+xvfb-run --server-args="-screen 0 1024x768x24" $RHUB_CHECK_COMMAND "$package"
 EOF
 
 # Destroy the new containers and the images
