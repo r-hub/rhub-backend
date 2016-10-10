@@ -36,6 +36,16 @@
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>startPingUrl</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>endPingUrl</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -54,6 +64,21 @@
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder plugin="groovy-postbuild@2.3.1">
+      <script plugin="script-security@1.23">
+        <script>
+	  String result = manager.getResult();
+String date = new Date().format(&quot;yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;&quot;, TimeZone.getTimeZone(&quot;UTC&quot;));
+String url = manager.getEnvVariable(&apos;endPingUrl&apos;) + &apos;/&apos; + result + &apos;/&apos; + manager.build.project.getName() + &apos;/&apos; + date;
+String json = url.toURL().text;
+manager.listener.logger.println('Pinging ' + url);
+manager.listener.logger.println(json);
+	</script>
+        <sandbox>false</sandbox>
+      </script>
+      <behavior>0</behavior>
+      <runForMatrixParent>false</runForMatrixParent>
+    </org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder>
     <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.41.3">
       <recipientList>{{{ email }}}</recipientList>
       <configuredTriggers>

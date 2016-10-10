@@ -1,4 +1,9 @@
 
+# Notify the frontend that we are starting the build
+
+$d = (get-date).ToUniversalTime().toString('s')
+Invoke-WebRequest ( $env:startPingUrl + '/' + $d )
+
 cp \Users\rhub\Documents\run.ps1 .
 cp \Users\rhub\Documents\slave.ps1 .
 

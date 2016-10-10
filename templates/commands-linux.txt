@@ -1,4 +1,7 @@
 
+# Notify the frontend that we are starting the build
+wget ${startPingUrl}/$(date -u +%Y-%m-%dT%H:%M:%SZ) || true
+
 # Get the platform, the R package uses this to determine
 # the packages needed
 export RHUB_PLATFORM=$(docker run --user docker \
