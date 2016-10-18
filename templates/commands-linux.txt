@@ -90,8 +90,10 @@ $RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE)"
 
 echo ">>>>>==================== Running R CMD check"
 
-## Configuration. TODO: this should not be hardcoded here...
-export _R_CHECK_FORCE_SUGGESTS_=false
+## We only override this if it was not set by the user
+if [ -z "${_R_CHECK_FORCE_SUGGESTS_}" ]; then
+    export _R_CHECK_FORCE_SUGGESTS_=false
+fi
 
 if [ -z "$RHUB_CHECK_COMMAND" ]; then
    RHUB_CHECK_COMMAND="$RBINARY CMD check $checkArgs"
