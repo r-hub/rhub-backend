@@ -27,8 +27,10 @@ echo ">>>>>==================== Installing system requirements"
 
 # Install them, if there is anything to install
 if [ ! -z "${sysreqs}" ]; then
-    cont=$(docker run -d --user root rhub/${image} \
-		  bash -c "$sysreqs")
+    echo "${sysreqs}" > sysreqs.sh
+    cont=$(docker run -d --user root \
+		  -v $(pwd)/sysreqs.sh:/root/sysreqs.sh \
+		  rhub/${image} bash /root/sysreqs.sh)
     # Wait until it stops
     docker attach $cont || true
     # Save the container as an image
@@ -82,6 +84,11 @@ $RBINARY CMD config CC
 `$RBINARY CMD config CC` --version
 $RBINARY CMD config CXX
 `$RBINARY CMD config CXX` --version
+
+echo Pandoc:
+which pandoc
+ls -l `which pandoc`
+ls -l `which pandoc-citeproc`
 
 ## Install the package, so its dependencies will be installed
 ## This is a temporary solution, until remotes::install_deps works on a
