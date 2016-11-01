@@ -108,6 +108,11 @@ fi
 
 echo About to run xvfb-run $RHUB_CHECK_COMMAND $package
 xvfb-run --server-args="-screen 0 1024x768x24" $RHUB_CHECK_COMMAND "$package"
+
+binname=$(echo $package | sed 's/\.tar.gz$/.tgz/')
+pkgname=$(echo $package | sed 's/_.*$//')
+(cd R; tar czf ../$binname $pkgname)
+mv $binname $pkgname.Rcheck/
 EOF
 
 # Save the artifacts
@@ -116,6 +121,8 @@ rm -rf ${JOB_BASE_NAME}
 mkdir -p ${JOB_BASE_NAME}
 docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
        ${JOB_BASE_NAME}/
+mv ${JOB_BASE_NAME}/${pkgname}.Rcheck/${pkgname}_*.tgz \
+   ${JOB_BASE_NAME}/ || true
 
 # Destroy the new containers and the images
 # Only if we needed system installs, but not the stock image
