@@ -121,4 +121,6 @@ docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
 # Only if we needed system installs, but not the stock image
 docker rm ${JOB_BASE_NAME}-1 || true
 docker rm ${JOB_BASE_NAME}-2 || true
-docker rmi $newimage || true
+if ! echo $newimage | grep -q 'rhub'; then
+    docker rmi $newimage || true
+fi
