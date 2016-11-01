@@ -7,4 +7,4 @@ Invoke-WebRequest ( $env:startPingUrl + '/' + $d )
 cp \Users\rhub\Documents\run.ps1 .
 cp \Users\rhub\Documents\slave.ps1 .
 
-.\run.ps1 -verbose $env:package $env:url $env:rversion $env:checkArgs $env:envVars
+.\run-test.ps1 -verbose $env:package $env:url $env:rversion $env:checkArgs $env:envVars
