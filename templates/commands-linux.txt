@@ -28,16 +28,15 @@ echo ">>>>>==================== Installing system requirements"
 # Install them, if there is anything to install
 if [ ! -z "${sysreqs}" ]; then
     echo "${sysreqs}" > sysreqs.sh
-    cont=$(docker run -d --user root \
-		  -v $(pwd)/sysreqs.sh:/root/sysreqs.sh \
-		  rhub/${image} bash /root/sysreqs.sh)
+    docker run -d --user root --name ${JOB_BASE_NAME}-1 \
+	   -v $(pwd)/sysreqs.sh:/root/sysreqs.sh \
+	   rhub/${image} bash /root/sysreqs.sh
     # Wait until it stops
-    docker attach $cont || true
+    docker attach ${JOB_BASE_NAME}-1 || true
     # Save the container as an image
-    newimage=$(docker commit $cont)
+    newimage=$(docker commit ${JOB_BASE_NAME}-1)
 else
     # If there is nothing to install we just use the stock image
-    cont=""
     newimage=rhub/${image}
 fi
 
@@ -51,7 +50,8 @@ echo "$envVars" >> $env
 
 echo ">>>>>==================== Starting Docker container"
 
-docker run -i --user docker --env-file $env --rm $newimage /bin/bash -l <<'EOF'
+docker run -i --user docker --env-file $env \
+       --name ${JOB_BASE_NAME}-2 $newimage /bin/bash -l <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
 
@@ -110,9 +110,15 @@ echo About to run xvfb-run $RHUB_CHECK_COMMAND $package
 xvfb-run --server-args="-screen 0 1024x768x24" $RHUB_CHECK_COMMAND "$package"
 EOF
 
+# Save the artifacts
+pkgname=$(echo $package | sed 's/_.*$//')
+rm -rf ${JOB_BASE_NAME}
+mkdir -p ${JOB_BASE_NAME}
+docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
+       ${JOB_BASE_NAME}/
+
 # Destroy the new containers and the images
 # Only if we needed system installs, but not the stock image
-if [ ! -z "$cont" ]; then
-    docker rm $cont   || true
-    docker rmi $newimage || true
-fi
+docker rm ${JOB_BASE_NAME}-1 || true
+docker rm ${JOB_BASE_NAME}-2 || true
+docker rmi $newimage || true
