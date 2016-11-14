@@ -93,7 +93,7 @@ ls -l `which pandoc-citeproc`
 ## Install the package, so its dependencies will be installed
 ## This is a temporary solution, until remotes::install_deps works on a
 ## package bundle
-$RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE)"
+$RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE, INSTALL_opts = \"--build\")"
 
 echo ">>>>>==================== Running R CMD check"
 
@@ -109,10 +109,7 @@ fi
 echo About to run xvfb-run $RHUB_CHECK_COMMAND $package
 xvfb-run --server-args="-screen 0 1024x768x24" $RHUB_CHECK_COMMAND "$package"
 
-binname=$(echo $package | sed 's/\.tar.gz$/.tgz/')
-pkgname=$(echo $package | sed 's/_.*$//')
-(cd R; tar czf ../$binname $pkgname)
-mv $binname $pkgname.Rcheck/
+mv "*.tar.gz" $pkgname.Rcheck/
 EOF
 
 # Save the artifacts
@@ -121,7 +118,7 @@ rm -rf ${JOB_BASE_NAME}
 mkdir -p ${JOB_BASE_NAME}
 docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
        ${JOB_BASE_NAME}/
-mv ${JOB_BASE_NAME}/${pkgname}.Rcheck/${pkgname}_*.tgz \
+mv ${JOB_BASE_NAME}/${pkgname}.Rcheck/*.tar.gz \
    ${JOB_BASE_NAME}/ || true
 
 # Destroy the new containers and the images
