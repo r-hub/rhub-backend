@@ -93,7 +93,7 @@
           </publishers>
           <continueOnError>false</continueOnError>
           <failOnError>false</failOnError>
-          <alwaysPublishFromMaster>true</alwaysPublishFromMaster>
+          <alwaysPublishFromMaster>false</alwaysPublishFromMaster>
           <hostConfigurationAccess class="jenkins.plugins.publish_over_ssh.BapSshPublisherPlugin" reference="../.."/>
         </delegate>
       </delegate>
