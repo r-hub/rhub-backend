@@ -65,6 +65,10 @@ $RBINARY -e "source('https://bioconductor.org/biocLite.R')"
 echo "options(repos = BiocInstaller::biocinstallRepos())" >> ~/.Rprofile
 echo "unloadNamespace('BiocInstaller')" >> ~/.Rprofile
 
+if [[ "${RHUB_BINARIES}" == "yes" ]]; then
+  echo "options(repos = c(RHUBBIN = 'https://cranbinaries.r-hub.io/linux/ubuntu16.04-R33x/', RHUB='http://jenkins.iotwjus4p5merbek114fbzbqud.dx.internal.cloudapp.net/', getOption('repos')))" >> ~/.Rprofile
+fi
+
 echo ">>>>>==================== Querying package dependencies"
 
 ## Download the single file install script from mangothecat/remotes
