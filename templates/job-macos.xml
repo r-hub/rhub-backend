@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>package</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>filename</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>url</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>image</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>checkArgs</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>envVars</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>startPingUrl</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>endPingUrl</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>swarm &amp;&amp; macos &amp;&amp; {{{ macos-version }}} &amp;&amp; {{{ r-version }}}</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>{{{ commands }}}
+      </command>
+    </hudson.tasks.Shell>
+    <jenkins.plugins.publish__over__ssh.BapSshBuilderPlugin plugin="publish-over-ssh@1.14">
+      <delegate>
+        <consolePrefix>SSH: </consolePrefix>
+        <delegate>
+          <publishers>
+            <jenkins.plugins.publish__over__ssh.BapSshPublisher>
+              <configName>files</configName>
+              <verbose>false</verbose>
+              <transfers>
+                <jenkins.plugins.publish__over__ssh.BapSshTransfer>
+                  <remoteDirectory>${JOB_BASE_NAME}</remoteDirectory>
+                  <sourceFiles>${JOB_BASE_NAME}/**/00install.out,${JOB_BASE_NAME}/**/00check.log,${JOB_BASE_NAME}/**/tests/**/*.Rout*,${JOB_BASE_NAME}/*.tgz</sourceFiles>
+                  <excludes></excludes>
+                  <removePrefix>${JOB_BASE_NAME}/</removePrefix>
+                  <remoteDirectorySDF>false</remoteDirectorySDF>
+                  <flatten>false</flatten>
+                  <cleanRemote>false</cleanRemote>
+                  <noDefaultExcludes>false</noDefaultExcludes>
+                  <makeEmptyDirs>false</makeEmptyDirs>
+                  <patternSeparator>[, ]+</patternSeparator>
+                  <execCommand></execCommand>
+                  <execTimeout>120000</execTimeout>
+                  <usePty>false</usePty>
+                </jenkins.plugins.publish__over__ssh.BapSshTransfer>
+              </transfers>
+              <useWorkspaceInPromotion>false</useWorkspaceInPromotion>
+              <usePromotionTimestamp>false</usePromotionTimestamp>
+            </jenkins.plugins.publish__over__ssh.BapSshPublisher>
+          </publishers>
+          <continueOnError>false</continueOnError>
+          <failOnError>false</failOnError>
+          <alwaysPublishFromMaster>false</alwaysPublishFromMaster>
+          <hostConfigurationAccess class="jenkins.plugins.publish_over_ssh.BapSshPublisherPlugin" reference="../.."/>
+        </delegate>
+      </delegate>
+    </jenkins.plugins.publish__over__ssh.BapSshBuilderPlugin>
+  </builders>
+  <publishers>
+    <org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder plugin="groovy-postbuild@2.3.1">
+      <script plugin="script-security@1.23">
+        <script>
+	  String result = manager.getResult();
+String date = new Date().format(&quot;yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;&quot;, TimeZone.getTimeZone(&quot;UTC&quot;));
+String url = manager.getEnvVariable(&apos;endPingUrl&apos;) + &apos;/&apos; + result + &apos;/&apos; + manager.build.project.getName() + &apos;/&apos; + date;
+String json = url.toURL().text;
+manager.listener.logger.println('Pinging ' + url);
+manager.listener.logger.println(json);
+	</script>
+        <sandbox>false</sandbox>
+      </script>
+      <behavior>0</behavior>
+      <runForMatrixParent>false</runForMatrixParent>
+    </org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.17.1">
+      <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
+        <timeoutSecondsString>600</timeoutSecondsString>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.AbortOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+  </buildWrappers>
+</project>
