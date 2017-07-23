@@ -113,10 +113,14 @@ fi
 echo About to run xvfb-run $RHUB_CHECK_COMMAND $package
 xvfb-run --server-args="-screen 0 1024x768x24" $RHUB_CHECK_COMMAND "$package"
 
+echo ">>>>>==================== Done with R CMD check"
+
 pkgname=$(echo $package | sed 's/_.*$//')
 mkdir -p $pkgname.Rcheck || true
 mv *.tar.gz $pkgname.Rcheck/ || true
 EOF
+
+echo ">>>>>==================== Saving artifacts"
 
 # Save the artifacts
 pkgname=$(echo $package | sed 's/_.*$//')
