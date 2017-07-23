@@ -99,6 +99,10 @@ ls -l `which pandoc-citeproc`
 ## package bundle
 xvfb-run --server-args="-screen 0 1024x768x24" $RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE, INSTALL_opts = \"--build\")"
 
+## If installation fails, then we do not run the check at all
+pkgname=$(echo $package | sed 's/_.*$//')
+if ! $RBINARY -q -e "library($pkgname)"; then exit 1; fi
+
 echo ">>>>>==================== Running R CMD check"
 
 ## We only override this if it was not set by the user
@@ -123,7 +127,6 @@ EOF
 echo ">>>>>==================== Saving artifacts"
 
 # Save the artifacts
-pkgname=$(echo $package | sed 's/_.*$//')
 rm -rf ${JOB_BASE_NAME}
 mkdir -p ${JOB_BASE_NAME}
 docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
