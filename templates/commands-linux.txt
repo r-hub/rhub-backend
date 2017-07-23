@@ -130,7 +130,7 @@ echo ">>>>>==================== Saving artifacts"
 rm -rf ${JOB_BASE_NAME}
 mkdir -p ${JOB_BASE_NAME}
 docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
-       ${JOB_BASE_NAME}/
+       ${JOB_BASE_NAME}/ || true
 mv ${JOB_BASE_NAME}/${pkgname}.Rcheck/*.tar.gz \
    ${JOB_BASE_NAME}/ || true
 
