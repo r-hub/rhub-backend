@@ -127,6 +127,7 @@ EOF
 echo ">>>>>==================== Saving artifacts"
 
 # Save the artifacts
+pkgname=$(echo $package | sed 's/_.*$//')
 rm -rf ${JOB_BASE_NAME}
 mkdir -p ${JOB_BASE_NAME}
 docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
