@@ -124,7 +124,7 @@ manager.listener.logger.println(json);
   <buildWrappers>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.17.1">
       <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
-        <timeoutSecondsString>600</timeoutSecondsString>
+        <timeoutSecondsString>1800</timeoutSecondsString>
       </strategy>
       <operationList>
         <hudson.plugins.build__timeout.operations.AbortOperation/>
