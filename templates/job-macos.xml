@@ -54,6 +54,16 @@
           <name>post-check.json</name>
           <description></description>
         </hudson.model.FileParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>build</name>
+          <description>Whether to run R CMD build.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>pkgname</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>

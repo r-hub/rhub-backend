@@ -1,6 +1,8 @@
 
 # Notify the frontend that we are starting the build
-wget ${startPingUrl}/$(date -u +%Y-%m-%dT%H:%M:%SZ) || true
+if [[ ! -z "${startPingUrl}" ]]; then
+    wget ${startPingUrl}/$(date -u +%Y-%m-%dT%H:%M:%SZ) || true
+fi
 
 # Get the platform, the R package uses this to determine
 # the packages needed
@@ -21,7 +23,7 @@ tar xzf "$package" "$DESC"
 echo ">>>>>==================== Querying system requirements"
 
 sysreqs=$(Rscript -e "library(sysreqs); cat(sysreq_commands(\"$DESC\"))")
-rm -rf "$package" "$DESC"
+rm "$DESC"
 
 echo ">>>>>==================== Installing system requirements"
 
@@ -40,17 +42,21 @@ else
     newimage=rhub/${image}
 fi
 
-# Run the build in the new image
+# Inject env vars into container
 
-env=$(tempfile)
+env=$(tempfile 2>/dev/null || mktemp)
 echo url=$url >> $env
 echo package=$package >> $env
 echo checkArgs=$checkArgs >> $env
+echo build=$build >> $env
 echo "$envVars" >> $env
+
+# Run the check in the new image
 
 echo ">>>>>==================== Starting Docker container"
 
 docker run -i --user docker --env-file $env \
+       -v "$(pwd)/${package}:/tmp/${package}" \
        --name ${JOB_BASE_NAME}-2 $newimage /bin/bash -l <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
@@ -69,6 +75,25 @@ if [[ "${RHUB_BINARIES}" == "yes" ]]; then
   echo "options(repos = c(RHUBBIN = 'https://cranbinaries.r-hub.io/linux/ubuntu16.04-R33x/', RHUB='http://jenkins.iotwjus4p5merbek114fbzbqud.dx.internal.cloudapp.net/', getOption('repos')))" >> ~/.Rprofile
 fi
 
+cp "/tmp/${package}" .
+
+if [[ "${build}" == "true" ]]; then
+    echo ">>>>>==================== Running R CMD build"
+    mkdir build
+    cd build
+    tar xzf ../"${package}"
+    pkgname=$(ls | head -1 | sed 's/\///')
+    $RBINARY CMD build ${pkgname}
+    package=$(ls *.tar.gz | head -1)
+    cp "${package}" ..
+    cd ..
+fi
+
+## We put it here, so the main process can pick it up
+mkdir -p /tmp/output
+cp "${package}" /tmp/output/
+echo "${package}" > /tmp/output/filename
+
 echo ">>>>>==================== Querying package dependencies"
 
 ## Download the single file install script from mangothecat/remotes
@@ -76,9 +101,6 @@ echo ">>>>>==================== Querying package dependencies"
 ## HTTPS. Then we install a proper 'remotes' package with it.
 curl -O https://raw.githubusercontent.com/MangoTheCat/remotes/master/install-github.R
 xvfb-run --server-args="-screen 0 1024x768x24" $RBINARY -e "source(\"install-github.R\")\$value(\"mangothecat/remotes\")"
-
-## Download the submitted package
-curl -L -o "$package" "$url"
 
 echo ">>>>>==================== Installing package dependencies"
 
@@ -127,9 +149,15 @@ EOF
 echo ">>>>>==================== Saving artifacts"
 
 # Save the artifacts
-pkgname=$(echo $package | sed 's/_.*$//')
 rm -rf ${JOB_BASE_NAME}
 mkdir -p ${JOB_BASE_NAME}
+
+docker cp "${JOB_BASE_NAME}-2:/tmp/output/filename" . || true
+package=$(cat filename | head -1)
+docker cp "${JOB_BASE_NAME}-2:/tmp/${package}" \
+       ${JOB_BASE_NAME}/ || true
+pkgname=$(echo $package | sed 's/_.*$//')
+
 docker cp "${JOB_BASE_NAME}-2:/home/docker/${pkgname}.Rcheck" \
        ${JOB_BASE_NAME}/ || true
 mv ${JOB_BASE_NAME}/${pkgname}.Rcheck/*.tar.gz \
@@ -139,6 +167,7 @@ mv ${JOB_BASE_NAME}/${pkgname}.Rcheck/*.tar.gz \
 # Only if we needed system installs, but not the stock image
 docker rm ${JOB_BASE_NAME}-1 || true
 docker rm ${JOB_BASE_NAME}-2 || true
+docker rm ${JOB_BASE_NAME}-3 || true
 if ! echo $newimage | grep -q 'rhub'; then
     docker rmi $newimage || true
 fi

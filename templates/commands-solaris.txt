@@ -6,4 +6,4 @@
 
 cp /export/home/solarischeck/*.sh .
 
-./run.sh "${package}" "${JOB_BASE_NAME}" "${url}" "${rversion}" "${checkArgs}" "${envVars}"
+./run.sh "${package}" "${JOB_BASE_NAME}" "${url}" "${rversion}" "${checkArgs}" "${envVars}" "${build}" "${pkgname}"
