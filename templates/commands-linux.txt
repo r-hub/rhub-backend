@@ -1,8 +1,6 @@
 
 # Notify the frontend that we are starting the build
-if [[ ! -z "${startPingUrl}" ]]; then
-    wget ${startPingUrl}/$(date -u +%Y-%m-%dT%H:%M:%SZ) || true
-fi
+wget ${startPingUrl}/$(date -u +%Y-%m-%dT%H:%M:%SZ) || true
 
 # Get the platform, the R package uses this to determine
 # the packages needed
