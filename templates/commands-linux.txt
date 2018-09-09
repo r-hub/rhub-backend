@@ -49,6 +49,7 @@ echo checkArgs=$checkArgs >> $env
 echo build=$build >> $env
 echo R_REMOTES_STANDALONE=true >> $env
 echo R_REMOTES_NO_ERRORS_FROM_WARNINGS=true >> $env
+echo TZ=Europe/London >> $env
 echo "$envVars" >> $env
 
 # Run the check in the new image
