@@ -6,7 +6,6 @@ var broker_url = process.env.RABBITMQ_URL;
 
 function run(q) {
 
-  console.log(broker_url);
   return amqp.connect(broker_url).then(function(conn) {
 	process.once('SIGINT', function() { conn.close(); });
 	return conn.createChannel().then(function(ch) {
