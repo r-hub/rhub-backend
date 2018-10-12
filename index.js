@@ -2,12 +2,12 @@ var debug = require('debug');
 var builder = require('./lib/builder');
 var amqp = require('amqplib');
 
-var broker_url = process.env.RABBITMQ_URL ||
-    'amqp://q.rhub.me:5672/rhub';
+var broker_url = process.env.RABBITMQ_URL;
 
 function run(q) {
 
-    amqp.connect(broker_url).then(function(conn) {
+  console.log(broker_url);
+  return amqp.connect(broker_url).then(function(conn) {
 	process.once('SIGINT', function() { conn.close(); });
 	return conn.createChannel().then(function(ch) {
 	    var ok = ch.assertQueue(q, {durable: true});
@@ -31,7 +31,21 @@ function run(q) {
 		})
 	    }
 	})
-    }).then(null, console.warn);
+    })
 }
 
-module.exports = run;
+function run_robust(q) {
+  var q2 = q;
+
+  function run_loop() {
+    run(q2).catch(function(err) {
+      console.log(err);
+      console.log("Waiting 1 sec and trying again");
+      setTimeout(run_loop, 1000);
+    });
+  }
+
+  run_loop();
+}
+
+module.exports = run_robust;
