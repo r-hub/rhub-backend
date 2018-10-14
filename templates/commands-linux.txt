@@ -28,11 +28,12 @@ echo ">>>>>==================== Installing system requirements"
 # Install them, if there is anything to install
 if [ ! -z "${sysreqs}" ]; then
     echo "${sysreqs}" > sysreqs.sh
-    docker run -d --user root --name ${JOB_BASE_NAME}-1 \
-	   -v $(pwd)/sysreqs.sh:/root/sysreqs.sh \
+    docker create --user root --name ${JOB_BASE_NAME}-1 \
 	   rhub/${image} bash /root/sysreqs.sh
-    # Wait until it stops
-    docker attach ${JOB_BASE_NAME}-1 || true
+    # Copy over sysreqs.sh script
+    docker cp sysreqs.sh "${JOB_BASE_NAME}-1:/root/sysreqs.sh"
+    # Start it
+    docker start -i -a ${JOB_BASE_NAME}-1
     # Save the container as an image
     newimage=$(docker commit ${JOB_BASE_NAME}-1)
 else
@@ -56,9 +57,7 @@ echo "$envVars" >> $env
 
 echo ">>>>>==================== Starting Docker container"
 
-docker run -i --user docker --env-file $env \
-       -v "$(pwd)/${package}:/tmp/${package}" \
-       --name ${JOB_BASE_NAME}-2 $newimage /bin/bash -l <<'EOF'
+cat >build.sh <<'EOF'
 ## The default might not be the home directory, but /
 cd ~
 
@@ -146,6 +145,12 @@ pkgname=$(echo $package | sed 's/_.*$//')
 mkdir -p $pkgname.Rcheck || true
 mv *.tar.gz $pkgname.Rcheck/ || true
 EOF
+
+docker create -i --user docker --env-file $env \
+       --name ${JOB_BASE_NAME}-2 $newimage /bin/bash -l /tmp/build.sh
+docker cp build.sh "${JOB_BASE_NAME}-2:/tmp/build.sh"
+docker cp "${package}" "${JOB_BASE_NAME}-2:/tmp/${package}"
+docker start -i -a ${JOB_BASE_NAME}-2
 
 echo ">>>>>==================== Saving artifacts"
 
