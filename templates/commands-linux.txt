@@ -41,6 +41,10 @@ else
     newimage=rhub/${image}
 fi
 
+if [ -z "$RHUB_CRAN_MIRROR" ]; then
+    RHUB_CRAN_MIRROR=http://jenkins.iotwjus4p5merbek114fbzbqud.dx.internal.cloudapp.net/
+fi
+
 # Inject env vars into container
 
 env=$(tempfile 2>/dev/null || mktemp)
@@ -51,6 +55,7 @@ echo build=$build >> $env
 echo R_REMOTES_STANDALONE=true >> $env
 echo R_REMOTES_NO_ERRORS_FROM_WARNINGS=true >> $env
 echo TZ=Europe/London >> $env
+echo RHUB_CRAN_MIRROR="$RHUB_CRAN_MIRROR" >> $env
 echo "$envVars" >> $env
 
 # Run the check in the new image
@@ -66,7 +71,7 @@ export PATH=$(ls /opt/R-* -d)/bin:$PATH
 if [[ -z "$RBINARY" ]]; then RBINARY="R"; fi
 export R_LIBS=~/R
 mkdir -p ~/R
-echo "options(repos = c(CRAN = \"http://jenkins.iotwjus4p5merbek114fbzbqud.dx.internal.cloudapp.net/\"))" >> ~/.Rprofile
+echo "options(repos = c(CRAN = \"$RHUB_CRAN_MIRROR\"))" >> ~/.Rprofile
 $RBINARY -e "source('https://bioconductor.org/biocLite.R')"
 echo "options(repos = BiocInstaller::biocinstallRepos())" >> ~/.Rprofile
 echo "unloadNamespace('BiocInstaller')" >> ~/.Rprofile
