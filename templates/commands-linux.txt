@@ -67,7 +67,7 @@ export PATH=$(ls /opt/R-* -d)/bin:$PATH
 if [[ -z "$RBINARY" ]]; then RBINARY="R"; fi
 export R_LIBS=~/R
 mkdir -p ~/R
-echo "options(repos = c(CRAN = \"http://jenkins.iotwjus4p5merbek114fbzbqud.dx.internal.cloudapp.net/\"))" >> ~/.Rprofile
+echo "options(repos = c(CRAN = \"https://cloud.r-project.org\"))" >> ~/.Rprofile
 $RBINARY -e "source('https://bioconductor.org/biocLite.R')"
 echo "options(repos = BiocInstaller::biocinstallRepos())" >> ~/.Rprofile
 echo "unloadNamespace('BiocInstaller')" >> ~/.Rprofile
