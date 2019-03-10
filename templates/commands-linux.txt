@@ -97,7 +97,7 @@ echo ">>>>>==================== Querying package dependencies"
 ## We cannot do this from R, because some R versions do not support
 ## HTTPS. Then we install a proper 'remotes' package with it.
 curl -O https://raw.githubusercontent.com/MangoTheCat/remotes/r-hub/install-github.R
-xvfb-run --server-args="-screen 0 1024x768x24" $RBINARY -e "source(\"install-github.R\")\$value(\"r-lib/remotes@r-hub\")"
+xvfb-run -a $RBINARY -e "source(\"install-github.R\")\$value(\"r-lib/remotes@r-hub\")"
 
 echo ">>>>>==================== Installing package dependencies"
 
@@ -116,7 +116,7 @@ ls -l `which pandoc-citeproc`
 ## Install the package, so its dependencies will be installed
 ## This is a temporary solution, until remotes::install_deps works on a
 ## package bundle
-xvfb-run --server-args="-screen 0 1024x768x24" $RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE, INSTALL_opts = \"--build\")"
+xvfb-run -a $RBINARY -e "remotes::install_local(\"$package\", dependencies = TRUE, INSTALL_opts = \"--build\")"
 
 ## If installation fails, then we do not run the check at all
 pkgname=$(echo $package | sed 's/_.*$//')
@@ -134,7 +134,7 @@ if [ -z "$RHUB_CHECK_COMMAND" ]; then
 fi
 
 echo About to run xvfb-run $RHUB_CHECK_COMMAND $package
-xvfb-run --server-args="-screen 0 1024x768x24" $RHUB_CHECK_COMMAND "$package"
+xvfb-run -a $RHUB_CHECK_COMMAND "$package"
 
 echo ">>>>>==================== Done with R CMD check"
 
