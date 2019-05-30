@@ -68,9 +68,9 @@ if [[ -z "$RBINARY" ]]; then RBINARY="R"; fi
 export R_LIBS=~/R
 mkdir -p ~/R
 echo "options(repos = c(CRAN = \"https://cloud.r-project.org\"))" >> ~/.Rprofile
-$RBINARY -e "source('https://bioconductor.org/biocLite.R')"
-echo "options(repos = BiocInstaller::biocinstallRepos())" >> ~/.Rprofile
-echo "unloadNamespace('BiocInstaller')" >> ~/.Rprofile
+$RBINARY -e "install.packages('BiocManager')"
+echo "options(repos = BiocManager::repositories())" >> ~/.Rprofile
+echo "unloadNamespace('BiocManager')" >> ~/.Rprofile
 
 cp "/tmp/${package}" .
 
