@@ -69,7 +69,7 @@ export R_LIBS=~/R
 mkdir -p ~/R
 echo "options(repos = c(CRAN = \"https://cloud.r-project.org\"))" >> ~/.Rprofile
 $RBINARY -e "install.packages('BiocManager')"
-echo "options(repos = BiocManager::repositories())" >> ~/.Rprofile
+echo "try(options(repos = BiocManager::repositories()))" >> ~/.Rprofile
 echo "unloadNamespace('BiocManager')" >> ~/.Rprofile
 
 cp "/tmp/${package}" .
